@@ -1,6 +1,8 @@
-﻿using System.Text;
+﻿using Library;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -16,6 +18,11 @@ namespace Forms1
     /// </summary>
     public partial class MainWindow : Window
     {
+        NightlightState newNightlight;
+        NightlightController controller = new NightlightController();
+        CheckBox chk_power; //Создаём ссылку заранее
+        Slider sld_brightness;
+        Label lbl_actuall_brightness;
         public MainWindow()
         {
             InitializeComponent();
@@ -23,15 +30,19 @@ namespace Forms1
             OperationsListBox.Items.Add("Операция 1: Включение");
             OperationsListBox.Items.Add("Операция 2: Настройка яркости");
             OperationsListBox.Items.Add("Операция 3: Выключение");
+
+            newNightlight = new NightlightState(); //Создаём новый объект для новой формы
         }
 
         // ОСНОВА ДЛЯ ВЫБОРА ОПЕРАЦИИ ИЗ СПИСКА
         private void OperationsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            /*
             // Проверяем, что пользователь действительно что-то выбрал
             if (OperationsListBox.SelectedItem != null)
             {
+                //Очистка дочерних элементов перед созданием новых (удаление детей, ха-ха)
+                FuncControlsPanel.Children.Clear();
+
                 // Получаем выбранный элемент
                 var selectedItem = OperationsListBox.SelectedItem;
 
@@ -44,65 +55,308 @@ namespace Forms1
                 label1.Content = operationName;
 
                 // Сбрасываем старые результаты при выборе новой операции
-                labelPreconditionValue.Content = "label4";
-                labelPostconditionValue.Content = "label4";
-                labelResult.Content = "label5";
+                labelPreconditionValue.Content = "";
+                labelPostconditionValue.Content = "";
+                labelResult.Content = "";
 
                 // Сбрасываем цвета квадратиков в серый
                 labelPreconditionColor.Background = Brushes.Gray;
                 labelPostconditionColor.Background = Brushes.Gray;
+
+                //Создание дочерних элементов при выборе опр. действия
+                switch (OperationsListBox.SelectedIndex)
+                {
+                    case 0:
+                        ControlsForOn();
+                        break;
+                    case 1:
+                        ControlsForSet();
+                        break;
+                    case 2:
+                        ControlsForOff();
+                        break;
+                    default:
+                        break;
+                }
             }
-            */
         }
 
-        // ОБРАБОТЧИК КНОПКИ "ВЫПОЛНИТЬ"
+        /// <summary>
+        /// Создание элементов управления для функции включения
+        /// </summary>
+        private void ControlsForOn()
+        {
+            chk_power = new CheckBox
+            {
+                Content = "Питание есть", //Корректировка чекбокса
+                FontSize = 14
+            };
+            
+            FuncControlsPanel.Children.Add(chk_power);
+
+            Label lbl_is_off = new Label
+            {
+                Content = "Свет должен быть выключен",
+                FontSize = 14
+            };
+            FuncControlsPanel.Children.Add(lbl_is_off);
+        }
+
+        /// <summary>
+        /// Реакция лейбла на движение ползунка
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void sld_brightness_set(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            var slider = (Slider)sender;
+            var parent = slider.Parent as Panel;
+            if (parent == null) return;
+
+            lbl_actuall_brightness.Content = $"{e.NewValue:0}%";
+        }
+
+        /// <summary>
+        /// Создание элементов управления для функции настройки яркости
+        /// </summary>
+        private void ControlsForSet()
+        {
+            Label lbl_is_on = new Label
+            {
+                Content = "Свет должен быть включен",
+                FontSize = 14
+            };
+            FuncControlsPanel.Children.Add(lbl_is_on);
+
+            var row = new Grid { Margin = new Thickness(0, 4, 0, 4) };
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+            Label lbl_brightness = new Label
+            {
+                Content = "Новая яркость:",
+                FontSize = 14,
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(0, 0, 8, 0)
+            };
+            Grid.SetColumn(lbl_brightness, 0);
+            row.Children.Add(lbl_brightness);
+
+            sld_brightness = new Slider
+            {
+                Minimum = 0,
+                Maximum = 100,
+                Value = newNightlight.Brightness,
+                TickFrequency = 1,
+                IsSnapToTickEnabled = true,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            Grid.SetColumn(sld_brightness, 1);
+            row.Children.Add(sld_brightness);
+
+            lbl_actuall_brightness = new Label
+            {
+                Content = $"{newNightlight.Brightness}%",
+                FontSize = 14,
+                VerticalAlignment = VerticalAlignment.Center,
+                HorizontalAlignment = HorizontalAlignment.Right,
+                MinWidth = 48,
+                Margin = new Thickness(8, 0, 0, 0)
+            };
+            Grid.SetColumn(lbl_actuall_brightness, 2);
+            row.Children.Add(lbl_actuall_brightness);
+
+            sld_brightness.ValueChanged += sld_brightness_set;
+
+            FuncControlsPanel.Children.Add(row);
+        }
+
+        /// <summary>
+        /// Создание элементов управления для функции выключения
+        /// </summary>
+        private void ControlsForOff()
+        {
+            Label lbl_is_on = new Label
+            {
+                Content = "Свет должен быть включен",
+                FontSize = 14
+            };
+            FuncControlsPanel.Children.Add(lbl_is_on);
+        }
+
+        /// <summary>
+        /// ОБРАБОТЧИК КНОПКИ "ВЫПОЛНИТЬ"
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Run_Click(object sender, RoutedEventArgs e)
         {
-            /*
-            // + логика проверки предусловия
-            bool isPreconditionMet = true;
-            bool isPostconditionMet = true;
+            switch (OperationsListBox.SelectedIndex)
+            {
+                case 0:
+                    Run_On();
+                    break;
+                case 1:
+                    Run_Set();
+                    break;
+                case 2:
+                    Run_Off();
+                    break;
+                default:
+                    break;
+            }
+        }
 
-            if (isPreconditionMet)
+        /// <summary>
+        /// Обработчик для функции включения
+        /// </summary>
+        private void Run_On()
+        {
+            //Проверка Pre
+            bool havePower = chk_power.IsChecked == true;
+            if (!havePower)
             {
-                // Если условие выполнено - красим квадратик в ЗЕЛЕНЫЙ
-                labelPreconditionColor.Background = Brushes.Green;
-                labelPreconditionValue.Content = "Выполнено";
+                PreDontWork("нет питания");
+                PostDontWork("свет не был вкюлчён");
+                return;
             }
-            else
+            else if (newNightlight.isOn)
             {
-                // Если не выполнено - красим в КРАСНЫЙ
-                labelPreconditionColor.Background = Brushes.Red;
-                labelPreconditionValue.Content = "Ошибка";
+                PreDontWork("свет уже включен");
+                PostDontWork("свет не был вкюлчён");
+                return;
+            }
+            else PreWork();
+
+            //Настройка значений
+            try
+            { controller.TurnOn(newNightlight); }
+            catch (Exception ex)
+            {
+                PreDontWork(ex.Message);
+                PostDontWork(ex.Message);
+                return;
             }
 
-            if (isPostconditionMet)
+            //Проверка Post
+            if (!newNightlight.isOn) PostDontWork("свет не был вкюлчён");
+            else PostWork();
+        }
+
+        /// <summary>
+        /// Обработчик для функции изменения яркости
+        /// </summary>
+        private void Run_Set()
+        {
+            //Проверка Pre
+            int newBrightness = (int)sld_brightness.Value;
+            int oldBrightness = newNightlight.Brightness;
+            if (!newNightlight.isOn)
             {
-                // Если условие выполнено - красим квадратик в ЗЕЛЕНЫЙ
-                labelPostconditionColor.Background = Brushes.Green;
-                labelPostconditionValue.Content = "Выполнено";
+                PreDontWork("свет выключен");
+                PostDontWork("яркость не была настроена");
+                return;
             }
-            else
+            else if (newBrightness == oldBrightness)
             {
-                // Если не выполнено - красим в КРАСНЫЙ
-                labelPostconditionColor.Background = Brushes.Red;
-                labelPostconditionValue.Content = "Не выполнено";
+                PreDontWork("новая яркость равна старой");
+                PostDontWork("яркость не была настроена");
+                return;
+            }
+            else PreWork();
+
+            //Настройка значений
+            try
+            { controller.SetBrightness(newNightlight, newBrightness); }
+            catch (Exception ex)
+            {
+                PreDontWork(ex.Message);
+                PostDontWork(ex.Message);
+                return;
             }
 
-            // Выводим результат
+            //Проверка Post
+            if (newBrightness != newNightlight.Brightness) PostDontWork("яркость не была настроена");
+            else PostWork();
+        }
+
+        /// <summary>
+        /// Обработчик для функции включения
+        /// </summary>
+        private void Run_Off()
+        {
+            //Проверка Pre
+            if (!newNightlight.isOn)
+            {
+                PreDontWork("свет уже выключен");
+                PostDontWork("свет не был выкюлчён");
+                return;
+            }
+            else PreWork();
+
+            //Настройка значений
+            try
+            { controller.TurnOff(newNightlight); }
+            catch (Exception ex)
+            {
+                PreDontWork(ex.Message);
+                PostDontWork(ex.Message);
+                return;
+            }
+
+            //Проверка Post
+            if (newNightlight.isOn) PostDontWork("свет не был выкюлчён");
+            else PostWork();
+        }
+
+        /// <summary>
+        /// При невыполненном Pre
+        /// </summary>
+        /// <param name="msg">Сообщение об ошибке</param>
+        private void PreDontWork(string msg)
+        {
+            labelPreconditionColor.Background = Brushes.Red;
+            labelPreconditionValue.Content = $"Ошибка: {msg}.";
+        }
+
+        /// <summary>
+        /// При невыполненном Post
+        /// </summary>
+        /// <param name="msg"></param>
+        private void PostDontWork(string msg)
+        {
+            labelPostconditionColor.Background = Brushes.Red;
+            labelPostconditionValue.Content = $"Ошибка: {msg}.";
+            labelResult.Content = "Операция была отменена.";
+        }
+
+        /// <summary>
+        /// При выполненном Pre
+        /// </summary>
+        private void PreWork()
+        {
+            labelPreconditionColor.Background = Brushes.Green;
+            labelPreconditionValue.Content = $"Выполнено.";
+        }
+
+        /// <summary>
+        /// При выполненном Post
+        /// </summary>
+        private void PostWork()
+        {
+            labelPostconditionColor.Background = Brushes.Green;
+            labelPostconditionValue.Content = $"Выполнено.";
             labelResult.Content = "Операция успешно завершена!";
-            */
         }
 
         // ОБРАБОТЧИК КНОПКИ "КОНТРАКТ"
         private void Contract_Click(object sender, RoutedEventArgs e)
         {
-            /*
-            MessageBox.Show("Здесь отображается информация о контракте выбранной операции.",
+            MessageBox.Show($"Здесь отображается информация о контракте выбранной операции.",
                             "Контракт операции",
                             MessageBoxButton.OK,
                             MessageBoxImage.Information);
-            */
         }
     }
 }

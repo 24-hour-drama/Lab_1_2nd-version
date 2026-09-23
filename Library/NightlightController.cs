@@ -10,9 +10,10 @@ using System.Timers;
 
 namespace Library
 {
-    internal class NightlightController
+    public class NightlightController
     {
-        private NightlightState State { get; set; }
+        //private NightlightState State { get; set; }
+        //public NightlightController() { }
 
         /// <summary>
         /// Включение
@@ -20,7 +21,7 @@ namespace Library
         /// </summary>
         /// <returns>режим (вкл./выкл.)</returns>
         /// <exception cref="InvalidOperationException">возникает, если ночние уже включён</exception>
-        public bool TurnOn()
+        public bool TurnOn(NightlightState State)
         {
             if (State.isOn) throw new InvalidOperationException("Ночник уже включён");
 
@@ -40,7 +41,7 @@ namespace Library
         /// </summary>
         /// <returns>режим (вкл./выкл.)</returns>
         /// <exception cref="InvalidOperationException">возникает, если ночник уже выключен</exception>
-        public bool TurnOff()
+        public bool TurnOff(NightlightState State)
         {
             if (!State.isOn) throw new InvalidOperationException("Ночник уже выключен");
 
@@ -56,7 +57,7 @@ namespace Library
         /// <param name="newBrightness">новая яркость</param>
         /// <exception cref="InvalidOperationException">возникает, если ночник выключен</exception>
         /// <exception cref="ArgumentOutOfRangeException">возникает, если яркость вышла за границы</exception>
-        public void SetBrightness(int newBrightness)
+        public void SetBrightness(NightlightState State, int newBrightness)
         {
             if (!State.isOn) throw new InvalidOperationException("Сначала включите ночник");
 
@@ -78,7 +79,7 @@ namespace Library
         /// <exception cref="InvalidOperationException">возникает, если ночник выключен</exception>
         /// <exception cref="ArgumentNullException">возникает, если цвет - пустое значение</exception>
         /// <exception cref="ArgumentException">возникает, если запрашиваемый цвет не поддерживается</exception>
-        public void SetColor(string newColor)
+        public void SetColor(NightlightState State, string newColor)
         {
             if (!State.isOn) throw new InvalidOperationException("Сначала включите ночник");
 
@@ -97,7 +98,7 @@ namespace Library
         /// <param name="minutes">кол-во минут</param>
         /// <exception cref="InvalidOperationException">возникает, если ночник выключен</exception>
         /// <exception cref="ArgumentOutOfRangeException">возникает, если значение минут не в диапазоне</exception>
-        public void SetTimer(int minutes)
+        public void SetTimer(NightlightState State, int minutes)
         {
             if (!State.isOn) throw new InvalidOperationException("Сначала включите ночник");
 
@@ -110,7 +111,7 @@ namespace Library
         /// <summary>
         /// Имитация тика (когда будет 0 - сброс)
         /// </summary>
-        public void TickSecond()
+        public void TickSecond(NightlightState State)
         {
             if (!State.isTimerActive) return;
 

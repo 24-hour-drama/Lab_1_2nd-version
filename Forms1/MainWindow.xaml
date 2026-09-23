@@ -64,7 +64,7 @@
 
             <!-- label1 (Заголовок выбранной операции) -->
             <Border Grid.Row="1" BorderBrush="#3333FF" BorderThickness="1" Margin="0,0,0,5" Background="#F0F8FF">
-                <Label x:Name="label1" Content="label1" Padding="5" FontSize="14" />
+                <Label x:Name="label1" Content="" Padding="5" FontSize="14" />
             </Border>
 
             <!-- Параметры -->
@@ -80,7 +80,10 @@
                 </Grid.RowDefinitions>
 
                 <!-- Пустая синяя область -->
-                <Border Grid.Row="0" BorderBrush="#3333FF" BorderThickness="2" Background="#F0F8FF" Margin="0,0,0,10"/>
+                <Border Grid.Row="0" BorderBrush="#3333FF" BorderThickness="2" Background="#F0F8FF" Margin="0,0,0,10">
+                    <!-- Панель-контейнер -->
+                    <StackPanel x:Name="FuncControlsPanel"/>
+                </Border>
 
                 <!-- Кнопка Выполнить -->
                 <Button Grid.Row="1" Content="Выполнить" Click="Run_Click" Width="120" Padding="5" 
@@ -112,7 +115,7 @@
                 </Border>
                 <!-- Значение label4 -->
                 <Border Grid.Row="0" Grid.Column="2" BorderBrush="#3333FF" BorderThickness="1" Margin="0,0,0,2" Padding="2">
-                    <Label x:Name="labelPreconditionValue" Content="label4" VerticalAlignment="Center"/>
+                    <Label x:Name="labelPreconditionValue" Content="" VerticalAlignment="Center"/>
                 </Border>
 
                 <!-- ПОСТУСЛОВИЕ -->
@@ -126,7 +129,7 @@
                 </Border>
                 <!-- Значение label4 -->
                 <Border Grid.Row="1" Grid.Column="2" BorderBrush="#3333FF" BorderThickness="1" Margin="0,0,0,2" Padding="2">
-                    <Label x:Name="labelPostconditionValue" Content="label4" VerticalAlignment="Center"/>
+                    <Label x:Name="labelPostconditionValue" Content="" VerticalAlignment="Center"/>
                 </Border>
 
                 <!-- РЕЗУЛЬТАТ -->
@@ -134,7 +137,7 @@
                     <Label Content="Результат:" VerticalAlignment="Center"/>
                 </Border>
                 <Border Grid.Row="2" Grid.Column="2" BorderBrush="#3333FF" BorderThickness="1" Padding="2">
-                    <Label x:Name="labelResult" Content="label5" VerticalAlignment="Center"/>
+                    <Label x:Name="labelResult" Content="" VerticalAlignment="Center"/>
                 </Border>
             </Grid>
 

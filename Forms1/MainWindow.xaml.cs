@@ -23,6 +23,8 @@ namespace Forms1
         CheckBox chk_power; //Создаём ссылку заранее
         Slider sld_brightness;
         Label lbl_actuall_brightness;
+        string pre_txt = "";
+        string post_txt = "";
         public MainWindow()
         {
             InitializeComponent();
@@ -67,12 +69,25 @@ namespace Forms1
                 switch (OperationsListBox.SelectedIndex)
                 {
                     case 0:
+                        pre_txt = "Питание есть (chk_power.IsChecked = true)\n" +
+                            "Свет выключен (NightlightState.isOn = false)";
+                        post_txt = "Свет включен (NightlightState.isOn = true)\n" +
+                            "Если яркость была 0 (выключен) – яркость 50 (NightlightState.Brightness = 50)\n" +
+                            "Если яркость была настроена ранее — значение сохраняется (NightlightState.Brightness не изменяется)";
                         ControlsForOn();
                         break;
                     case 1:
+                        pre_txt = "Свет включен (NightlightState.isOn = true)\n" +
+                            "Новая яркость не равна старой (newBrightness != oldBrightness)";
+                        post_txt = "Яркость изменена (NightlightState.Brightness = newBrightness)\n" +
+                            "Если яркость была настроена на 0 – выключение (NightlightState.isOn = false)\n" +
+                            "Если яркость была настроена не на 0 — состояние сохраняется (NightlightState.isOn = true)";
                         ControlsForSet();
                         break;
                     case 2:
+                        pre_txt = "Свет включен (NightlightState.isOn = true)\n";
+                        post_txt = "Свет выключен (NightlightState.isOn = false)\n" +
+                            "Сохранение настроенной яркости (NightlightState.Brightness не изменяется)";
                         ControlsForOff();
                         break;
                     default:
@@ -215,6 +230,7 @@ namespace Forms1
         {
             //Проверка Pre
             bool havePower = chk_power.IsChecked == true;
+            int oldBrightness = newNightlight.Brightness;
             if (!havePower)
             {
                 PreDontWork("нет питания");
@@ -231,7 +247,9 @@ namespace Forms1
 
             //Настройка значений
             try
-            { controller.TurnOn(newNightlight); }
+            {
+                controller.TurnOn(newNightlight);
+            }
             catch (Exception ex)
             {
                 PreDontWork(ex.Message);
@@ -353,10 +371,16 @@ namespace Forms1
         // ОБРАБОТЧИК КНОПКИ "КОНТРАКТ"
         private void Contract_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show($"Здесь отображается информация о контракте выбранной операции.",
-                            "Контракт операции",
+            if (OperationsListBox.SelectedItem != null)
+                MessageBox.Show($"{OperationsListBox.SelectedItem.ToString()}\n\n\n" +
+                    $"pre:\n{pre_txt}\n\npost:\n{post_txt}",
+                            $"Контракт операции {OperationsListBox.SelectedItem.ToString()}",
                             MessageBoxButton.OK,
                             MessageBoxImage.Information);
+            else MessageBox.Show($"Пожалуйста, выберете сначала операцию",
+                            $"Операция не выбрана",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Warning);
         }
     }
 }

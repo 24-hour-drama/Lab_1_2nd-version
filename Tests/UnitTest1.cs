@@ -45,6 +45,39 @@ namespace Tests
 
             Assert.Throws<ArgumentOutOfRangeException>(
                 () => _controller.SetBrightness(state, -1));
+
+        }
+
+        [Fact]
+        public void TurnItOn()
+        {
+            var state = new NightlightState { isOn = false, Brightness = 0 };
+            _controller.TurnOn(state);
+            Assert.True(state.isOn);
+            Assert.Equal(50, state.Brightness);
+        }
+
+        [Fact] 
+        public void TurnOn()
+        {
+            var state = new NightlightState { isOn = true };
+            Assert.Throws<InvalidOperationException>(() => _controller.TurnOn(state));
+        }
+
+
+        [Fact]
+        public void TurnItOff()
+        {
+            var state = new NightlightState { isOn = true };
+            _controller.TurnOff(state);
+            Assert.False(state.isOn);
+        }
+
+        [Fact]
+        public void TurnOff()
+        {
+            var state = new NightlightState { isOn = false };
+            Assert.Throws<InvalidOperationException>(() => _controller.TurnOff(state));
         }
 
         [Fact]
@@ -69,6 +102,7 @@ namespace Tests
             var state = new NightlightState
             {
                 isOn = true,
+
                 TimerMinutes = 30,
                 isTimerActive = true
             };

@@ -10,7 +10,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Forms1", "Forms1.csproj", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Library", "..\Library\Library.csproj", "{39FC4FA8-49E2-4969-BBD2-7F92B59C9DBA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "..\Tests\Tests.csproj", "{1F762488-9DF7-4165-A0FA-479AE2C10223}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tests", "..\Tests\tests.csproj", "{1F762488-9DF7-4165-A0FA-479AE2C10223}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

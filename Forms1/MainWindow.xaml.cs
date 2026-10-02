@@ -22,7 +22,9 @@ namespace Forms1
         NightlightController controller = new NightlightController();
         CheckBox chk_power; //Создаём ссылку заранее
         Slider sld_brightness;
+        ComboBox cmb_colors;
         Label lbl_actuall_brightness;
+        List<string> colors = new List<string> { "Warm white", "Cold white", "White" };
         string pre_txt = "";
         string post_txt = "";
         public MainWindow()
@@ -85,6 +87,13 @@ namespace Forms1
                             "Если яркость была настроена на 0 – выключение (NightlightState.isOn = false)\n" +
                             "Если яркость была настроена не на 0 — состояние сохраняется (NightlightState.isOn = true)";
                         ControlsForSet();
+                        break;
+                    case 2:
+                        pre_txt = "Свет включен (NightlightState.isOn = true)\n" +
+                            "Новый цвет отличается от прежнего (newColor != oldColor)";
+                        post_txt = "Цвет изменен (NightlightState.currentColor = newColor)\n" +
+                            "Включенное состояние сохраняется (NightlightState.isOn = true)";
+                        ControlsForColor();
                         break;
                     case 4:
                         pre_txt = "Свет включен (NightlightState.isOn = true)\n";
@@ -179,6 +188,83 @@ namespace Forms1
             ;
         }
 
+        public void ControlsForColor()
+        {
+            Label lbl_is_on = new Label
+            {
+                Content = "Свет должен быть включен",
+                FontSize = 14
+            };
+            FuncControlsPanel.Children.Add(lbl_is_on);
+
+            var row = new Grid { Margin = new Thickness(0, 4, 0, 4) };
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
+            Label lbl_color = new Label
+            {
+                Content = "Новый цвет:",
+                FontSize = 14,
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(0, 0, 8, 0)
+            };
+            Grid.SetColumn(lbl_color, 0);
+            row.Children.Add(lbl_color);
+
+            cmb_colors = new ComboBox();
+            foreach (string s in colors)
+                cmb_colors.Items.Add(s);
+
+            int indColor;
+            switch (newNightlight.currentColor)
+            {
+                case "warmwhite":
+                    indColor = 0;
+                    break;
+                case "coldwhite":
+                    indColor = 1;
+                    break;
+                case "white":
+                    indColor = 2;
+                    break;
+                default:
+                    indColor = 2;
+                    break;
+            }       
+            cmb_colors.SelectedIndex = indColor;
+
+            cmb_colors.SelectionChanged += cmb_colors_selectionChanged;
+            Grid.SetColumn(cmb_colors, 1);
+            row.Children.Add(cmb_colors);
+
+            FuncControlsPanel.Children.Add(row);
+        }
+
+        private void cmb_colors_selectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!newNightlight.isOn)
+            {
+                PreDontWork("Ночник выключен");
+                labelPostconditionColor.Background = Brushes.Gray;
+                labelPostconditionValue.Content = $"";
+                labelResult.Content = "Операция недоступна";
+            }
+            else if (cmb_colors.SelectedItem.ToString().ToLower().Replace(" ", "") == newNightlight.currentColor)
+            {
+                PreDontWork("Цвет не изменён");
+                labelPostconditionColor.Background = Brushes.Gray;
+                labelPostconditionValue.Content = $"";
+                labelResult.Content = "Операция недоступна";
+            }
+            else
+            {
+                PreWork();
+                labelPostconditionColor.Background = Brushes.Gray;
+                labelPostconditionValue.Content = $"";
+                labelResult.Content = "";
+            }
+        }
+
         /// <summary>
         /// Создание элементов управления для функции настройки яркости
         /// </summary>
@@ -264,6 +350,9 @@ namespace Forms1
                     Run_Set();
                     break;
                 case 2:
+                    Run_Color();
+                    break;
+                case 4:
                     Run_Off();
                     break;
                 default:
@@ -307,6 +396,40 @@ namespace Forms1
 
             //Проверка Post
             if (!newNightlight.isOn) PostDontWork("свет не был вкюлчён");
+            else PostWork();
+        }
+
+        private void Run_Color()
+        {
+            //Проверка Pre
+            string newColor = cmb_colors.SelectedItem.ToString().ToLower().Replace(" ", "");
+            string oldColor = newNightlight.currentColor;
+            if (!newNightlight.isOn)
+            {
+                PreDontWork("свет выключен");
+                PostDontWork("яркость не была настроена");
+                return;
+            }
+            else if (newColor == oldColor)
+            {
+                PreDontWork("не был выбран новый цвет");
+                PostDontWork("цвет не был настроен");
+                return;
+            }
+            else PreWork();
+
+            //Настройка значений
+            try
+            { controller.SetColor(newNightlight, newColor); }
+            catch (Exception ex)
+            {
+                PreDontWork(ex.Message);
+                PostDontWork(ex.Message);
+                return;
+            }
+
+            //Проверка Post
+            if (newColor != newNightlight.currentColor) PostDontWork("цвет не был настроен");
             else PostWork();
         }
 

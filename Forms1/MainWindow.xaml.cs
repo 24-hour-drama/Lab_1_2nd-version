@@ -31,7 +31,9 @@ namespace Forms1
 
             OperationsListBox.Items.Add("Операция 1: Включение");
             OperationsListBox.Items.Add("Операция 2: Настройка яркости");
-            OperationsListBox.Items.Add("Операция 3: Выключение");
+            OperationsListBox.Items.Add("Операция 3: Настройка цвета");
+            OperationsListBox.Items.Add("Операция 4: Таймер");
+            OperationsListBox.Items.Add("Операция 5: Выключение");
 
             newNightlight = new NightlightState(); //Создаём новый объект для новой формы
         }
@@ -84,7 +86,7 @@ namespace Forms1
                             "Если яркость была настроена не на 0 — состояние сохраняется (NightlightState.isOn = true)";
                         ControlsForSet();
                         break;
-                    case 2:
+                    case 4:
                         pre_txt = "Свет включен (NightlightState.isOn = true)\n";
                         post_txt = "Свет выключен (NightlightState.isOn = false)\n" +
                             "Сохранение настроенной яркости (NightlightState.Brightness не изменяется)";
@@ -106,7 +108,10 @@ namespace Forms1
                 Content = "Питание есть", //Корректировка чекбокса
                 FontSize = 14
             };
-            
+
+            chk_power.Checked += chk_power_select;
+            chk_power.Unchecked += chk_power_select;
+
             FuncControlsPanel.Children.Add(chk_power);
 
             Label lbl_is_off = new Label
@@ -115,6 +120,26 @@ namespace Forms1
                 FontSize = 14
             };
             FuncControlsPanel.Children.Add(lbl_is_off);
+        }
+
+        private void chk_power_select(object sender, EventArgs e)
+        {
+            if (chk_power.IsChecked == true)
+            {
+                PreWork();
+                labelPostconditionColor.Background = Brushes.Gray;
+                labelPostconditionValue.Content = $"";
+                labelResult.Content = "";
+            }
+            else
+            {
+                PreDontWork("Нет питания");
+                labelPostconditionColor.Background = Brushes.Gray;
+                labelPostconditionValue.Content = $"";
+                labelResult.Content = "Операция недоступна";
+                if (newNightlight.isOn)
+                    controller.TurnOff(newNightlight);
+            }
         }
 
         /// <summary>
@@ -129,6 +154,29 @@ namespace Forms1
             if (parent == null) return;
 
             lbl_actuall_brightness.Content = $"{e.NewValue:0}%";
+
+            if (!newNightlight.isOn)
+            {
+                PreDontWork("Ночник выключен");
+                labelPostconditionColor.Background = Brushes.Gray;
+                labelPostconditionValue.Content = $"";
+                labelResult.Content = "Операция недоступна";
+            }
+            else if (sld_brightness.Value == newNightlight.Brightness)
+            {
+                PreDontWork("Яркость не изменена");
+                labelPostconditionColor.Background = Brushes.Gray;
+                labelPostconditionValue.Content = $"";
+                labelResult.Content = "Операция недоступна";
+            }
+            else
+            {
+                PreWork();
+                labelPostconditionColor.Background = Brushes.Gray;
+                labelPostconditionValue.Content = $"";
+                labelResult.Content = "";
+            }
+            ;
         }
 
         /// <summary>

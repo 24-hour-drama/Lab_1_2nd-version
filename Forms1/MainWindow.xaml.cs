@@ -539,7 +539,7 @@ namespace Forms1
             labelResult.Content = "Операция успешно завершена!";
         }
 
-        // ОБРАБОТЧИК КНОПКИ "КОНТРАКТ"
+        // ОБРАБОТЧИК КНОПКИ "КОНТРАКТ
         private void Contract_Click(object sender, RoutedEventArgs e)
         {
             if (OperationsListBox.SelectedItem != null)
